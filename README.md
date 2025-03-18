@@ -1,18 +1,20 @@
-# Drowsiness-Detection-with-YoloV5
+Phát hiện Buồn ngủ với YOLOv5
  
- This repository consists of a drowsiness detection based on YOLOv5 implementation. You can reach the base repo [here](https://github.com/ultralytics/yolov5)
+Kho lưu trữ này bao gồm một hệ thống phát hiện buồn ngủ dựa trên YOLOv5. Bạn có thể truy cập kho lưu trữ gốc [tại đây](https://github.com/ultralytics/yolov5)
  
  
-## 1. Prepared Custom Data Set
+1. Chuẩn bị Bộ dữ liệu Tùy chỉnh
+Một bộ dữ liệu tùy chỉnh đã được chuẩn bị cho dự án này. Video được quay từ 21 người khác nhau trong các kịch bản có thể xảy ra khi lái xe. Ba danh mục khác nhau đã được đề cập trong các video này: bình thường, ngáp và vị trí đầu. Các điều kiện ánh sáng khác nhau và việc sử dụng kính đã được tính đến. Tổng cộng có 63 video được thu thập và gán nhãn theo phương pháp được sử dụng.
 
 A custom data set was prepared for this project. Videos were taken from 21 different people in scenarios that could happen while driving. Three different categories were discussed in these videos: normal, yawning and head position. Various light conditions and the use of glasses were taken into account. A total of 63 videos were obtained and labeling was done according to the method to be used.
 
 
-## 2. Labeling Phase
+2. Giai đoạn Gán nhãn
+Phần mềm LabelImg có thể được sử dụng để gán nhãn trong các dự án sử dụng phương pháp phát hiện đối tượng. Phần mềm này hỗ trợ các định dạng PASCAL VOC, YOLO và CreateML. Vì dự án này sử dụng YOLOv5 để huấn luyện, dữ liệu được gán nhãn dưới dạng tệp .txt. Không nên sử dụng các ký tự tiếng Thổ Nhĩ Kỳ trong nhãn.
 
-The LabelImg program can be used for labeling in projects where the object detection method is used. Supports PASCAL VOC , YOLO and CreateML formats. Since training is done with Yolov5 in this project, the data is labeled in txt format. Turkish characters should not be used in labels.
+2.1 Cài đặt LabelImg trên Windows
+Lấy kho lưu trữ
 
-### 2.1 LabelImg Installation for Windows:
 
 **Get repo**
  
@@ -26,47 +28,47 @@ The LabelImg program can be used for labeling in projects where the object detec
 
 `pyrcc5 -o libs/resources.py resources.qrc`
 
-**When the code below is run, LabelImg will be opened. For subsequent uses, it is sufficient to perform only last step.**
+Chạy lệnh dưới đây để mở LabelImg. Đối với lần sử dụng sau, chỉ cần thực hiện bước cuối cùng này.
 
 `python labelImg.py`
 
-**Notes: After installing LabelImg, the ”predefined_classes.txt” file in the data folder can be emptied or the classes to be used can be written. In this way, problems that may occur during the labeling phase are prevented.**
+Lưu ý: Sau khi cài đặt LabelImg, tệp predefined_classes.txt trong thư mục dữ liệu có thể được làm trống hoặc ghi các lớp sẽ sử dụng để tránh lỗi trong quá trình gán nhãn.
 
 ![predefined_classes](https://user-images.githubusercontent.com/73580507/159132999-55ba4f21-48c3-40d6-a70d-9a3431de3bfb.png)
 
-**There are 1975 labeled images in total for model training. 80% of this data is split as train and 20% as test. 4 classes were used as “normal, drowsy, drowsy#2, yawning”. "drowsy" includes eyes closed but head is upright, "drowsy#2" includes head dropping forward. It is labeled in two different ways so that the model does not make the wrong decision.**
+Có tổng cộng 1.975 hình ảnh được gán nhãn để huấn luyện mô hình. 80% dữ liệu được dùng để huấn luyện và 20% để kiểm tra. Dữ liệu được chia thành 4 lớp: "bình thường", "buồn ngủ", "buồn ngủ #2" và "ngáp".
 
+"buồn ngủ" bao gồm mắt nhắm nhưng đầu thẳng.
+"buồn ngủ #2" bao gồm đầu gục xuống. Việc phân loại này giúp mô hình không đưa ra quyết định sai.
+3. Giai đoạn Huấn luyện
+Thuật toán YOLOv5 được chọn vì có thể cho kết quả chính xác cao ngay cả với ít dữ liệu. Ngoài ra, mô hình Nano có thể chạy trên các thiết bị nhúng và chiếm ít bộ nhớ. Cấu trúc thư mục dữ liệu phải như sau:
 
-## 3. Training Phase
-
-**While the Yolov5 algorithm is preferred because it can produce high accuracy results even with little data, it is preferred because the nano model can be developed on embedded devices and the model takes up little space. The data folder structure should be as follows:**
 
 ![data_format](https://user-images.githubusercontent.com/73580507/159135000-635c7787-81eb-4c70-a2b6-47c0f54bdcc8.png)
 
 
-### 3.1 Editing YAML files
+3.1 Chỉnh sửa tệp YAML
+Tệp data.yaml chứa số lượng và tên nhãn, đường dẫn đến dữ liệu huấn luyện và kiểm tra. Tệp này cần nằm trong thư mục yolov5/data.
 
-**The data.yaml file holds the number and names of labels, the file path of the train and test data. This file should be located in the yolov5/data folder.**
 
 ![data_yaml](https://user-images.githubusercontent.com/73580507/159135929-206f18ec-e1fd-4281-bb69-d24bc425d3cd.png)
 
-**The nc value in the yolov5n_drowsy.yaml file has been changed to 4 as it represents the number of classes. This file should be located in the yolov5/models folder.**
+Giá trị nc trong tệp yolov5n_drowsy.yaml được chỉnh thành 4 vì nó đại diện cho số lớp. Tệp này cần nằm trong thư mục yolov5/models.
 
-### 3.2 Training of the Model
+3.2 Huấn luyện mô hình
 
 ```
 python train.py  --resume --imgsz 640 --batch 16 --epochs 600 --data data/data.yaml --cfg models/yolov5n_drowsy.yaml --weights weights/yolov5n.pt  --name drowsy_result  --cache --device 0
 ```
-**The training is complete, as the model performed well at 173 epochs.**
+Quá trình huấn luyện hoàn tất khi mô hình đạt hiệu suất tốt nhất tại epoch 173.
 
-
-## 4. Drowsiness Detection with Trained Model
-
+4. Phát hiện Buồn ngủ với Mô hình Đã Huấn luyện
+bash
 ```
 python drowsy_detect.py --weights runs/train/drowsy_result/weights/best.pt --source data/drowsy_training/test/images --hide-conf
 ```
 
-**Check this file [drowsy_training_with_yolov5.ipynb](https://github.com/suhedaras/Drowsiness-Detection-with-YoloV5/blob/main/drowsy_training_with_yolov5.ipynb) for training**
+Bạn có thể tham khảo tệp [drowsy_training_with_yolov5.ipynb] để biết thêm chi tiết về huấn luyện.(https://github.com/suhedaras/Drowsiness-Detection-with-YoloV5/blob/main/drowsy_training_with_yolov5.ipynb) for training**
 
 
 ## 5. Result
